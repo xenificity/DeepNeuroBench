@@ -146,7 +146,7 @@ The `config/config.sh` script installs all dependencies automatically.
 Clone this repository on `vm0` (master node) at `/home/ubuntu`:
 
 ```bash
-git clone https://github.com/xenificity/benchmark-neuro-fabric.git
+git clone https://github.com/xenificity/DeepNeuroBench.git
 ```
 
 ### Step 1 — Bootstrap worker nodes
@@ -154,7 +154,7 @@ git clone https://github.com/xenificity/benchmark-neuro-fabric.git
 ```bash
 nodes=(vm1 vm2 vm3)
 for node in "${nodes[@]}"; do
-  scp vm0:~/benchmark-neuro-fabric/config/config.sh $node:~
+  scp vm0:~/DeepNeuroBench/config/config.sh $node:~
   ssh $node "screen -dmS config bash ~/config.sh"
 done
 ```
@@ -198,7 +198,7 @@ See the [Datasets](#datasets) section above.
 ### Step 8 — Copy FreeSurfer license
 
 ```bash
-cp -r ~/benchmark-neuro-fabric/freesurfer_key/ /mydata/
+cp -r ~/DeepNeuroBench/freesurfer_key/ /mydata/
 ```
 
 Replace `freesurfer_key/license.txt` with your own license file before this step.
@@ -216,8 +216,8 @@ for node in "${nodes[@]}"; do
 done
 # Copy monitoring scripts to workers
 for node in vm1 vm2 vm3; do
-    scp vm0:~/benchmark-neuro-fabric/stats/pscript_cpu.sh $node:/home/ubuntu/pscript.sh
-    scp vm0:~/benchmark-neuro-fabric/stats/pscript_gpus.sh $node:/home/ubuntu/pscript_gpu.sh
+    scp vm0:~/DeepNeuroBench/stats/pscript_cpu.sh $node:/home/ubuntu/pscript.sh
+    scp vm0:~/DeepNeuroBench/stats/pscript_gpus.sh $node:/home/ubuntu/pscript_gpu.sh
 done
 ```
 
@@ -239,7 +239,7 @@ source ~/.bashrc
 ### Step 11 — Deploy Nextflow configuration files
 
 ```bash
-cp ~/benchmark-neuro-fabric/config/deepprep.slurm.*.config \
+cp ~/DeepNeuroBench/config/deepprep.slurm.*.config \
    /mydata/DeepPrep/deepprep/nextflow/cluster/
 ```
 
@@ -252,7 +252,7 @@ Each experiment is one (cluster × dataset) cell in Table 3 of the paper. There 
 ### CPU cluster (C1, C3, C4)
 
 ```bash
-cd ~/benchmark-neuro-fabric/stats
+cd ~/DeepNeuroBench/stats
 bash deepPrep.sh
 ```
 
@@ -261,7 +261,7 @@ bash deepPrep.sh
 ### GPU cluster (C2)
 
 ```bash
-cd ~/benchmark-neuro-fabric/stats
+cd ~/DeepNeuroBench/stats
 bash deepPrep_gpu.sh
 ```
 
@@ -317,7 +317,7 @@ eGRID2023 subregion emission factors used: HIOA = 0.667 (C1/Hawaii), CAMX = 0.20
 After all VMs have been collected back to vm0:
 
 ```bash
-cd ~/benchmark-neuro-fabric/stats
+cd ~/DeepNeuroBench/stats
 
 # Generate per-VM and combined power plots (reproduces Figs. 4, 5, 6)
 python3 power-plot.py
