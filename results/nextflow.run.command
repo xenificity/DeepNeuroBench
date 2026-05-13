@@ -1,0 +1,1 @@
+nextflow run /opt/DeepPrep/deepprep/nextflow/deepprep.nf -c /output/WorkDir/nextflow/run.config -w /output/WorkDir/nextflow -with-report /output/QC/report.html -with-timeline /output/QC/timeline.html --bids_dir /input --output_dir /output --fs_license_file /fs_license.txt --bold_task_type rest

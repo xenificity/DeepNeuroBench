@@ -1,0 +1,20 @@
+# FreeSurfer license — replace placeholder with your own, never commit the real one
+freesurfer_key/license.txt
+
+# Raw profiling data collected from VMs (large CSVs, not part of artifact)
+stats/*_plot_ready.csv
+stats/cpu_power.out
+stats/vm*.csv
+
+# DeepPrep working directories and outputs
+**/WorkDir/
+**/output/
+**/*.sif
+
+# Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
