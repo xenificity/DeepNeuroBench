@@ -56,8 +56,8 @@ done
 Step: 4 Copy the `slurm.conf` file at `/etc/slurm/slurm.conf` and `/etc/slurm-llnl/slurm.conf` (_you can create slurm directory if it doesnot exist in /etc directory_)  
 ```
 sudo mkdir -p /etc/slurm
-sudo cp ~/Neuro*/slurm/slurm.conf /etc/slurm
-sudo cp ~/Neuro*/slurm/slurm.conf /etc/slurm-llnl
+sudo cp ~/DeepNeuroBench/slurm/slurm.conf /etc/slurm
+sudo cp ~/DeepNeuroBench/slurm/slurm.conf /etc/slurm-llnl
 ```
 
 Step: 5 Copying `slurm.conf` in other worker nodes:  
@@ -73,9 +73,9 @@ done
 
 Step: 6 Verify configuration by running following commands:  
 ```
-bash ~/benchmark-neuro-fabric/slurm/check_munge.sh &&
-bash ~/benchmark-neuro-fabric/slurm/start_slurm.sh &&
-bash ~/benchmark-neuro-fabric/slurm/check_status.sh
+bash ~/DeepNeuroBench/slurm/check_munge.sh &&
+bash ~/DeepNeuroBench/slurm/start_slurm.sh &&
+bash ~/DeepNeuroBench/slurm/check_status.sh
 ```
 
 😎😎😎😎😎😎Eureka, You made it.😎😎😎😎😎😎
