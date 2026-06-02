@@ -3,28 +3,20 @@ This repository is the reproducibility artifact the DeepNeuroBench. It contains 
 
 ## Prerequisites
 - Access to [FABRIC testbed](https://fabric-testbed.net/) (free academic account)
-- Ubuntu 20.04 VMs with PCIe GPU passthrough (for C2)
 - FreeSurfer license (free from [surfer.nmr.mgh.harvard.edu](https://surfer.nmr.mgh.harvard.edu/registration.html))
-- Each worker VM needs: Docker, Singularity, Nextflow, Java 17, Slurm, Redis, `powertop`, `dstat`, `nvidia-smi`
 
 Step: 1 Cluster Configurations (C1–C4): 
-Use the `DeepNeuroBench-cluster.ipynb` script in the `/src` directory to create clusters in FABRIC testbed.
+Use the `DeepNeuroBench_Cluster_Creation.ipynb` script in the `/pynb` directory to create clusters in FABRIC testbed.
 | ID | Name | vCPUs (total) | GPUs | RAM/node (GB total) | FABRIC Site |
 |----|------|--------------|------|---------------------|-------------|
-| **C1** | High-Core CPU-Intensive | 64 (192) | — | 64 (192) | HAWI (Hawaii) |
-| **C2** | GPU-Accelerated | 16 (48) | 3 (2× RTX 6000 + 1× T4) | 64 (192) | TACC (Texas) |
-| **C3** | Standard-Core CPU-Only | 16 (48) | — | 64 (192) | HAWI (Hawaii) |
-| **C4** | Memory-Enhanced | 16 (48) | — | 128 (384) | HAWI (Hawaii) |
+| **C1** | CPU-Only High-Core (CPU-Intensive) | 64 (192) | — | 64 (192) | HAWI (Hawaii) |
+| **C2** | CPU-GPU Cluster (GPU-Accelerated) | 16 (48) | 3 (2× RTX 6000 + 1× T4) | 64 (192) | TACC (Texas) |
+| **C3** | CPU-Only Standard-Core  | 16 (48) | — | 64 (192) | HAWI (Hawaii) |
+| **C4** | CPU-Only (Memory-Enhanced) | 16 (48) | — | 128 (384) | HAWI (Hawaii) |
 
+Step: 2 Datasets downloading: The paper uses five publicly available, BIDS-formatted neuroimaging datasets. All are available via the Hugging Face datasets hub (mirrored from OpenNeuro / NITRC).
 
-Step: 2 Datasets downloading:
-
----
-
-## Datasets
-The paper uses five publicly available, BIDS-formatted neuroimaging datasets. All are available via the Hugging Face datasets hub (mirrored from OpenNeuro / NITRC).
-
-| ID | Name | Subjects | Scans | Size | Morphology Index *M* | Optimal |
+| ID | Name | Subjects | Scans | Size | Morphology Index *R* | Optimal |
 |----|------|----------|-------|------|----------------------|---------|
 | DS-I | Professional Chess Players | 29 | 58 (29 sMRI + 29 fMRI) | 1.1 GB | 0.45 | C2 |
 | DS-II | NeuroCycle+ | 4 | 100 (sMRI only) | 3 GB | ∞ | C2 |
@@ -32,29 +24,7 @@ The paper uses five publicly available, BIDS-formatted neuroimaging datasets. Al
 | DS-IV | Tumor | 36 | 72 (36 sMRI + 36 fMRI) | 1.6 GB | 0.19 | C2 |
 | DS-V | Cognition | 18 | 36 (18 sMRI + 18 fMRI) | 4.2 GB | 0.013 | C1 |
 
-All five datasets are publicly available from their original sources. Download them into `/mydata/data` using the appropriate client per source (NITRC web download, or OpenNeuro CLI / DataLad for the ds00* IDs):
-
-```bash
-mkdir -p /mydata/data && cd /mydata/data
-
-# DS-I (NITRC, requires registration)
-# See http://fcon_1000.projects.nitrc.org/indi/pro/wchsu_li_index.html
-
-# DS-II to DS-V (OpenNeuro — install openneuro-py: `pip install openneuro-py`)
-openneuro-py download --dataset=ds006491 --target-dir=DS-II   # NeuroCycle+
-openneuro-py download --dataset=ds007441 --target-dir=DS-III  # Human Dignity
-openneuro-py download --dataset=ds005003 --target-dir=DS-IV   # Tumor
-openneuro-py download --dataset=ds007376 --target-dir=DS-V    # Cognition
-```
-
-Original dataset sources:
-- DS-I: [NITRC / Li et al. 2015](http://fcon_1000.projects.nitrc.org/indi/pro/wchsu_li_index.html)
-- DS-II: [OpenNeuro ds006491](https://openneuro.org/datasets/ds006491/versions/1.0.1)
-- DS-III: [OpenNeuro ds007441](https://openneuro.org/datasets/ds007441/versions/1.0.1)
-- DS-IV: [OpenNeuro ds005003](https://openneuro.org/datasets/ds005003/versions/2.0.0)
-- DS-V: [OpenNeuro ds007376](https://openneuro.org/datasets/ds007376/versions/1.0.0)
-
----
+All five datasets are publicly available from their original sources. Download them into `/mydata/data` at `VM0`using the appropriate client per source (_NITRC web download, or OpenNeuro CLI / DataLad for the ds00* IDs_):
 
 
 
