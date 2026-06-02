@@ -14,7 +14,33 @@ Use the `DeepNeuroBench_Cluster_Creation.ipynb` script in the `/pynb` directory 
 | **C3** | CPU-Only Standard-Core  | 16 (48) | — | 64 (192) | HAWI (Hawaii) |
 | **C4** | CPU-Only (Memory-Enhanced) | 16 (48) | — | 128 (384) | HAWI (Hawaii) |
 
-Step: 2 Datasets downloading: The paper uses five publicly available, BIDS-formatted neuroimaging datasets. All are available via the Hugging Face datasets hub (mirrored from OpenNeuro / NITRC).
+
+Step: 2 Clone this repository on `vm0` (master node) at `/home/ubuntu`:  
+```
+git clone https://github.com/xenificity/DeepNeuroBench.git
+```
+
+Step: 3 : Configuration/Installation on worker nodes:
+```bash
+nodes=(vm1 vm2 vm3)
+for node in "${nodes[@]}"; do
+  scp vm0:~/DeepNeuroBench/config/config.sh $node:~
+  ssh $node "screen -dmS config bash ~/config.sh"
+done
+```
+
+Step 4 : Set up shared NFS storage:
+Follow `/src/NFS-setup.md`. The shared volume mounts at `/mydata` on all nodes. 
+
+Step 5 : Clone DeepPrep:
+```bash
+git clone https://github.com/pBFSLab/DeepPrep.git /mydata/DeepPrep
+```
+
+Step 6 — Install and configure Slurm
+Follow `/slurm/slurm_installation.md`. Copy `slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
+
+Step: nn Datasets downloading: The paper uses five publicly available, BIDS-formatted neuroimaging datasets. All are available via the Hugging Face datasets hub (mirrored from OpenNeuro / NITRC).
 
 | ID | Name | Subjects | Scans | Size | Morphology Index *R* | Optimal |
 |----|------|----------|-------|------|----------------------|---------|
@@ -25,6 +51,7 @@ Step: 2 Datasets downloading: The paper uses five publicly available, BIDS-forma
 | DS-V | Cognition | 18 | 36 (18 sMRI + 18 fMRI) | 4.2 GB | 0.013 | C1 |
 
 All five datasets are publicly available from their original sources. Download them into `/mydata/data` at `VM0`using the appropriate client per source (_NITRC web download, or OpenNeuro CLI / DataLad for the ds00* IDs_):
+
 
 
 
@@ -68,44 +95,8 @@ The `config/config.sh` script installs all dependencies automatically.
 
 ---
 
-## Setup (Steps 1–11)
 
-Clone this repository on `vm0` (master node) at `/home/ubuntu`. During the IISWC 2026 anonymous review period, the artifact is hosted at:
 
-```bash
-# Anonymous mirror for IISWC 2026 review:
-#   https://anonymous.4open.science/r/DeepNeuroBench-D818/
-# Download as a tarball from the anonymous mirror, or use the
-# git clone URL provided in the camera-ready version after acceptance.
-```
-
-### Step 1 — Bootstrap worker nodes
-
-```bash
-nodes=(vm1 vm2 vm3)
-for node in "${nodes[@]}"; do
-  scp vm0:~/DeepNeuroBench/config/config.sh $node:~
-  ssh $node "screen -dmS config bash ~/config.sh"
-done
-```
-
-### Step 2 — Install conda on all workers
-
-Run `src/conda_installation.sh` on each worker (or include in the Step 1 bootstrap).
-
-### Step 3 — Set up shared NFS storage
-
-Follow `src/NFS-setup.md`. The shared volume mounts at `/mydata` on all nodes. Total space required: ~15 GB input + ~100 GB output per experiment run.
-
-### Step 4 — Clone DeepPrep
-
-```bash
-git clone https://github.com/pBFSLab/DeepPrep.git /mydata/DeepPrep
-```
-
-### Step 5 — Install and configure Slurm
-
-Follow `slurm/slurm_installation.md`. Copy `slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
 
 ### Step 6 — Build the DeepPrep Singularity image
 
@@ -211,221 +202,3 @@ sudo docker run --rm --gpus all \
   --cpus 16 --memory 64
 ```
 
----
-
-## Profiling and Monitoring
-
-The monitoring stack runs automatically inside `deepPrep.sh` / `deepPrep_gpu.sh`. It can also be controlled manually:
-
-| Script | Purpose | Command |
-|--------|---------|---------|
-| `run_dstat.py start N` | Start dstat on N–1 workers | `python3 run_dstat.py start 4` |
-| `run_pstat.py start N` | Start powertop on N–1 workers | `python3 run_pstat.py start 4` |
-| `run_gpu_stat.py start N` | Start nvidia-smi on N–1 workers | `python3 run_gpu_stat.py start 4` |
-| `run_cpuusage.py start N` | Start CPU utilization on N–1 workers | `python3 run_cpuusage.py start 4` |
-| `run_dstat.py collect N` | Pull CSVs from workers to vm0 | `python3 run_dstat.py collect 4` |
-| `run_pstat.py collect N` | Pull power CSVs to vm0 | `python3 run_pstat.py collect 4` |
-
-**How CPU power is measured:** `pscript_cpu.sh` runs `powertop --csv` in kernel-tracepoint mode on each worker at 2-second intervals, extracts the "system baseline" power field, and writes timestamped rows to `plot_ready.csv`. `pscript.py` stops automatically when the `MYDSTAT` screen session ends.
-
-**How GPU power is measured:** `pscript_gpus.sh` polls `nvidia-smi --query-gpu=power.draw` at 2-second intervals.
-
-**Energy derivation** (matching §3.3 of the paper):
-
-```
-Energy (J)   = Σ (P_i × Δt)        where Δt = 2 s, sum over full makespan
-Energy (kWh) = Energy (J) / 3.6×10⁶
-Carbon (kgCO₂) = Energy (kWh) × EF(site)
-```
-
-eGRID2023 subregion emission factors used: HIOA = 0.667 (C1/Hawaii), CAMX = 0.207 (C2/San Diego), FRCC = 0.355 (C3/Miami), RFCE = 0.288 (C4/College Park).
-
----
-
-## Collecting and Plotting Results
-
-After all VMs have been collected back to vm0:
-
-```bash
-cd ~/DeepNeuroBench/stats
-
-# Generate per-VM and combined power plots (reproduces Figs. 4, 5, 6)
-python3 power-plot.py
-
-# Or use the interactive notebook
-jupyter notebook power-plot.ipynb
-jupyter notebook cpu-plot.ipynb
-
-# Extract makespan from Nextflow timeline
-python3 create_duration.py results/timeline.html
-```
-
-`power-plot.py` reads `vm1_plot_ready.csv`, `vm2_plot_ready.csv`, `vm3_plot_ready.csv` (collected from workers) and generates:
-- Per-VM CPU / GPU / Total power time series
-- Combined multi-VM overlay chart
-
----
-
-## Dataset Morphology Index and Algorithm 1
-
-The **morphology ratio** *R* (called *M* in earlier drafts) is defined per §3 of the paper:
-
-```
-R = avg(sMRI scan size) / avg(fMRI scan size)
-```
-
-For datasets with no fMRI scans (DS-II), *R* = ∞ by convention.
-
-### Algorithm 1 — reference implementation
-
-`src/recommend_cluster.py` is a from-scratch, dependency-free reproduction of **Algorithm 1** (page 6 of the manuscript). It takes either a precomputed *R* or a BIDS directory, plus an optimization priority, and returns both the recommended cluster *C\** and the corresponding Nextflow/Slurm config profile *Φ(C\*)*.
-
-```bash
-# Compute the recommendation directly from R
-python3 src/recommend_cluster.py --R 0.45 --priority makespan
-# Recommended cluster: C2   (GPU-Accelerated)
-# Config profile     : config/deepprep.slurm.gpu.config
-
-# Or let the script compute R from a BIDS-formatted dataset
-python3 src/recommend_cluster.py --bids-dir /mydata/data/DS-III --priority energy
-
-# JSON output for scripting / Nextflow integration
-python3 src/recommend_cluster.py --R inf --priority co2 --json
-```
-
-### Decision regimes (matches Algorithm 1 verbatim)
-
-| Regime                | Routing                                                                                                              |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **R < 0.02**          | *fMRI-dominant* → **C1** (high-core CPU), regardless of priority. Example: DS-V.                                     |
-| **R ≥ 0.15**          | *sMRI-dominant* → **C2** for `makespan`, `co2`, or `energy`; **C4** for `power`; **C3** for `cost`. Examples: DS-I, DS-II, DS-III, DS-IV. |
-| **0.02 ≤ R < 0.15**   | *Intermediate* → **C2** for `makespan`/`co2`; **C4** for `power`/`energy`; **C3** for `cost`.                         |
-
-The thresholds **0.02** and **0.15** are taken directly from §3 of the paper; the older draft value of 0.25 has been corrected.
-
-### Verifying Algorithm 1 on the five benchmark datasets
-
-```bash
-python3 -m pytest tests/test_recommend_cluster.py -q
-# 87 passed in 0.5s
-```
-
-The test suite exercises every branch of Algorithm 1 and confirms that `recommend_cluster(R, "makespan")` reproduces the *Optimal* column of Table 2 for all five datasets — including the two boundary regimes DS-II (R = ∞) and DS-V (R = 0.013).
-
----
-
-## Repository File Reference
-
-| File | Maps to paper section |
-|------|-----------------------|
-| `src/recommend_cluster.py` | **Algorithm 1** (p. 6) — multi-criteria cluster recommendation |
-| `tests/test_recommend_cluster.py` | Algorithm 1 unit tests (Table 2 verification, branch coverage) |
-| `tests/test_table3_consistency.py` | Internal-consistency checks on Table 3 |
-| `scripts/verify_artifact.sh` | Single-command offline reproducibility check |
-| `results/table2_morphology.csv` | **Table 2** — dataset characteristics + *R* values |
-| `results/table3_metrics.csv` | **Table 3** — makespan, power, energy, carbon, cost |
-| `config/deepprep.slurm.cpu.config` | §3.1 — cluster configurations C1/C3/C4 |
-| `config/deepprep.slurm.gpu.config` | §3.1 — cluster configuration C2 |
-| `slurm/slurm.conf` | §3.1.3 — Slurm setup |
-| `stats/pscript_cpu.sh` | §3.3 — CPU power via powertop |
-| `stats/pscript_gpus.sh` | §3.3 — GPU power via nvidia-smi |
-| `stats/run_pstat.py` | §3.3 — orchestrated profiling |
-| `stats/run_dstat.py` | §3.3 — dstat resource collection |
-| `stats/power-plot.py` | Fig. 2 — power/utilization plots |
-| `stats/create_duration.py` | Table 3 — makespan extraction |
-| `stats/deepPrep.sh` | §4 — CPU cluster experiment runner |
-| `stats/deepPrep_gpu.sh` | §4 — GPU cluster experiment runner |
-| `results/` | Sample output from DS-I on C2 |
-| `pynb/DeepPrep_Cluster_Creation.ipynb` | §3.1 — FABRIC slice provisioning |
-
----
-
-## Sample Results & Table 3 Cross-Reference
-
-The `results/` directory contains both a complete sample run for DS-I (Chess Players) on C2 and machine-readable copies of the manuscript's main tables for reviewer cross-reference.
-
-### Sample run (DS-I on C2)
-
-- `results/report.html` — Nextflow execution report (task-level resource usage)
-- `results/timeline.html` — Pipeline execution timeline (used to extract makespan)
-- `results/plot*.png` — Power consumption plots
-- `results/sub-*/` — Per-subject DeepPrep QC reports (29 subjects)
-
-This corresponds to the C2 / DS-I row in Table 3 of the paper: makespan 544.33 min, avg total power 231.45 W, energy 2.10 kWh, carbon 0.435 kgCO₂, projected on-demand cost $46.40.
-
-### Machine-readable tables
-
-| File | Description |
-|------|-------------|
-| `results/table2_morphology.csv` | Datasets, subject/scan counts, sMRI/fMRI size ranges, *R*, optimal cluster |
-| `results/table3_metrics.csv` | Per-(dataset × cluster) makespan, power, energy, carbon, cost + grid metadata (FABRIC site, eGRID subregion, EF) |
-
-`tests/test_table3_consistency.py` verifies that for 18 of 20 rows in `table3_metrics.csv` the reported carbon equals `Energy × EF` within rounding tolerance, and that Algorithm 1 selects exactly the per-dataset minimum-makespan row across all five datasets.
-
----
-
-## Reproducibility Checklist
-
-For IISWC 2026 artifact reviewers, the following are verifiable **offline** in under one minute:
-
-- [x] **Algorithm 1** (paper page 6) — `src/recommend_cluster.py` + 87 unit tests in `tests/test_recommend_cluster.py`. Run: `python3 -m pytest tests/test_recommend_cluster.py -q`
-- [x] **Table 2 *R* / Optimal column** — parametrized test `test_table2_optimal_makespan` covers all five datasets.
-- [x] **Table 3 internal consistency** — 8 checks in `tests/test_table3_consistency.py` (carbon vs energy×EF, per-dataset min-makespan cluster).
-- [x] **Φ(C\*) config-profile mapping** — `test_config_profile_paths_exist` confirms every cluster's declared Nextflow profile is actually present in the repository.
-- [x] **Single-command verification** — `bash scripts/verify_artifact.sh` runs all of the above plus a CLI smoke test.
-
-The following require the FABRIC testbed and ~24 h per run:
-
-- [ ] End-to-end DeepPrep workflow on FABRIC slices C1–C4
-- [ ] Live power / GPU / dstat collection via the `stats/` orchestration scripts
-- [ ] Figure 2 plot generation from raw `vm*_plot_ready.csv` traces
-
----
-
-## Known Manuscript Discrepancies
-
-Two rows of Table 3 — **DS-I / C4** and **DS-II / C4** — exhibit an internal inconsistency: the reported Carbon column matches the *cluster-total* C4 power draws quoted in §4.2 (1.09 kW on DS-I, 1.81 kW on DS-II) when reconstructed as `Power × Makespan × EF`, but the Energy column appears to have been aggregated differently. The artifact preserves the manuscript's printed numbers verbatim in `results/table3_metrics.csv` so reviewers can cross-reference, and `tests/test_table3_consistency.py` explicitly documents these two rows in `KNOWN_TABLE3_CARBON_INCONSISTENCIES`. The qualitative claim of §4.2 — that C4 incurs disproportionate carbon / energy on DS-I and DS-II — is unaffected (C4 still has the highest reported carbon on DS-II in Table 3, by a wide margin).
-
----
-
-## Citation
-
-This artifact accompanies an anonymous submission to IISWC 2026. A complete citation block will be added in the camera-ready version. For the review period, please refer to the paper as:
-
-```bibtex
-@inproceedings{deepneurobench2026anon,
-  title     = {A Benchmark for Cost and Energy-Efficient Execution of
-               Neuroimaging Workflows on Commodity Clusters},
-  booktitle = {Proceedings of the IEEE International Symposium on Workload
-               Characterization (IISWC)},
-  note      = {Anonymous submission \#344, under review},
-  year      = {2026}
-}
-```
-
-**DeepPrep** (the pipeline being characterized):
-```bibtex
-@article{ren2025deepprep,
-  title   = {DeepPrep: an accelerated, scalable and robust pipeline for neuroimaging
-             preprocessing empowered by deep learning},
-  author  = {Ren, Jianxun and others},
-  journal = {Nature Methods},
-  volume  = {22},
-  pages   = {473--476},
-  year    = {2025},
-  doi     = {10.1038/s41592-025-02599-1}
-}
-```
-
-**FABRIC testbed**:
-```bibtex
-@article{baldin2019fabric,
-  title   = {{FABRIC}: A national-scale programmable experimental network infrastructure},
-  author  = {Baldin, Ilya and others},
-  journal = {IEEE Internet Computing},
-  volume  = {23},
-  number  = {6},
-  pages   = {38--47},
-  year    = {2019}
-}
-```
