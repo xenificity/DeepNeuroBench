@@ -32,7 +32,7 @@ Step: 2 Clone this repository on `vm0` (master node) at `/home/ubuntu`:
 git clone https://github.com/xenificity/DeepNeuroBench.git
 ```
 
-Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://github.com/MU-CyberTraining/NeuroImaging-on-FABRIC/blob/main/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
+Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://github.com/xenificity/DeepNeuroBench/blob/main/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
 
 
 Step 4 : Clone DeepPrep at the `/mydata` at `vm0` (_shared directory_):
