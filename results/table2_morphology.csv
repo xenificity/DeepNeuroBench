@@ -1,6 +1,0 @@
-dataset,name,subjects,scans_total,scans_sMRI,scans_fMRI,size_GB,sMRI_MB_min,sMRI_MB_max,fMRI_MB_min,fMRI_MB_max,R,optimal_cluster
-DS-I,Chess Players,29,58,29,29,1.1,7.4,16,25,27,0.45,C2
-DS-II,NeuroCycle+,4,100,100,0,3.0,24,39,,,inf,C2
-DS-III,Human Dignity,40,80,40,40,2.7,12,13,53,62,0.22,C2
-DS-IV,Tumor,36,72,36,36,1.6,6.4,7.7,35,40,0.19,C2
-DS-V,Cognition,18,36,18,18,4.2,3.4,4.4,193,410,0.013,C1
