@@ -32,7 +32,7 @@ Step: 2 Clone this repository on `vm0` (master node) at `/home/ubuntu`:
 git clone https://github.com/xenificity/DeepNeuroBench.git
 ```
 
-Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://github.com/MU-CyberTraining/NeuroImaging-on-FABRIC/blob/main/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
+Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://github.com/xenificity/DeepNeuroBench/blob/main/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
 
 
 Step 4 : Clone DeepPrep at the `/mydata` at `vm0` (_shared directory_):
@@ -42,7 +42,35 @@ git clone https://github.com/pBFSLab/DeepPrep.git /mydata/DeepPrep
 
 Step 5 : Slurm Installation: Follow instructions at [`/slurm/slurm_installation.md`](https://github.com/xenificity/DeepNeuroBench/blob/main/slurm/slurm_installation.md), Copy `/slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
 
-Step 7 : Configuration/Installation on worker nodes:
+
+Step: 6 Copying `license.txt` to `/mydata`:  
+```
+cd /mydata
+cp -r ~/DeepNeuroBench/freesurfer_key/ /mydata/
+```
+
+Step: 7 Setting environment paths on vm1 (change dataset input/output paths here):
+```
+ENV_VARS=$(cat <<EOF
+# DeepPrep Environment Variables
+export DEEP_PREP_HOME=/mydata/DeepPrep
+export OUTPUT_DIR=/mydata/output/chess_data/run-1
+export FS_LICENSE=/mydata/freesurfer_key/license.txt
+export SINGULARITY_IMG=/mydata/deepprep_25.1.0.sif
+export BIDS_DIR=/mydata/data/chess_data/bids # you may change this based on your input dataset
+EOF
+)
+CONFIG_FILE="$HOME/.bashrc"
+echo "$ENV_VARS" >> "$CONFIG_FILE"
+source ~/.bashrc
+```
+
+Step: 8 Copying CPU and GPU configuration files: 
+```
+cp ~/DeepNeuroBench/config/deepprep.slurm.*.config /mydata/DeepPrep/deepprep/nextflow/cluster/
+```
+
+Step 9 (a) : Configuration/Installation on worker nodes:
 ```bash
 nodes=(vm1 vm2 vm3)
 for node in "${nodes[@]}"; do
@@ -51,21 +79,7 @@ for node in "${nodes[@]}"; do
 done
 ```
 
-Step 8 : Install Singularity and DeepPrep singularity image using command:   # This would take 10-15minutes for `.sif` file build
-```bash
-cp ~/Neuro*/src/install_singularity.sh /mydata
-nodes=(vm0 vm1 vm2 vm3)
-for node in "${nodes[@]}"; do
-    echo "$node"
-    ssh "$node" "screen -dmS myscreen /mydata/install_singularity.sh"
-done
-ssh vm0 'screen -dmS downloading_singu_image bash -c "cd /mydata && sudo singularity build deepprep_25.1.0.sif docker://pbfslab/deepprep:25.1.0"'
-mkdir -p /mydata/output
-sudo chmod -R 777 /mydata
-sudo chown -R ubuntu:ubuntu /mydata
-```
-
-Step: 9 Download MRI dataset in BIDS data structure, and keep at `/mydata/data/bids` directory: 
+Step: 9 (b) Download MRI dataset in BIDS data structure, and keep at `/mydata/data/bids` directory: 
 
 | ID | Name | Subjects | Scans | Size | Morphology Index *R* | Optimal |
 |----|------|----------|-------|------|----------------------|---------|
@@ -96,34 +110,22 @@ hf download xenificity/PostNatalBrains --repo-type dataset --local-dir .
 "
 ```
 
-Step: 10 Copying `license.txt` to `/mydata`:  
-```
-cd /mydata
-cp -r ~/DeepNeuroBench/freesurfer_key/ /mydata/
-```
-
-Step: 11 Setting environment paths on vm1 (change dataset input/output paths here):
-```
-ENV_VARS=$(cat <<EOF
-# DeepPrep Environment Variables
-export DEEP_PREP_HOME=/mydata/DeepPrep
-export OUTPUT_DIR=/mydata/output/chess_data/run-1
-export FS_LICENSE=/mydata/freesurfer_key/license.txt
-export SINGULARITY_IMG=/mydata/deepprep_25.1.0.sif
-export BIDS_DIR=/mydata/data/chess_data/bids # you may change this based on your input dataset
-EOF
-)
-CONFIG_FILE="$HOME/.bashrc"
-echo "$ENV_VARS" >> "$CONFIG_FILE"
-source ~/.bashrc
+Step 9 (C) : Install Singularity and DeepPrep singularity image using command:   # This would take 10-15minutes for `.sif` file build
+```bash
+cp ~/Neuro*/src/install_singularity.sh /mydata
+nodes=(vm0 vm1 vm2 vm3)
+for node in "${nodes[@]}"; do
+    echo "$node"
+    ssh "$node" "screen -dmS myscreen /mydata/install_singularity.sh"
+done
+ssh vm0 'screen -dmS downloading_singu_image bash -c "cd /mydata && sudo singularity build deepprep_25.1.0.sif docker://pbfslab/deepprep:25.1.0"'
+mkdir -p /mydata/output
+sudo chmod -R 777 /mydata
+sudo chown -R ubuntu:ubuntu /mydata
 ```
 
-Step: 12 Copying CPU and GPU configuration files: 
-```
-cp ~/DeepNeuroBench/config/deepprep.slurm.*.config /mydata/DeepPrep/deepprep/nextflow/cluster/
-```
 
-Step: 13 Use the below instruction to run on single vm,    
+Step: 10 (a) Use the below instruction to run on single vm,    
 Using Docker  
 ```
 sudo rm -r -f /mydata/output/*
@@ -135,7 +137,7 @@ sudo rm -r -f /mydata/output/*
 sudo docker run -it --rm --gpus all -v /mydata/data/chess_dataset/bids:/input -v /mydata/output:/output -v /mydata/freesurfer_key/license.txt:/fs_license.txt pbfslab/deepprep:25.1.0 /input /output participant --fs_license_file /fs_license.txt --bold_task_type rest --cpus 16 --memory 64
 ```
 
-Step: 14 Use the below instruction to run on cluster using slurm:  
+Step: 14 (b) Use the below instruction to run on cluster using slurm:  
 Using CPUs:  
 ```
 Go to ~/DeepNeuroBench/stats and run, deepPrep.sh in screen mode  
