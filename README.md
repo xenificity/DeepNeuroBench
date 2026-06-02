@@ -20,7 +20,18 @@ Step: 2 Clone this repository on `vm0` (master node) at `/home/ubuntu`:
 git clone https://github.com/xenificity/DeepNeuroBench.git
 ```
 
-Step: 3 : Configuration/Installation on worker nodes:
+Step 3 : Set up shared NFS storage:
+Follow `/src/NFS-setup.md`. The shared volume mounts at `/mydata` on all nodes. 
+
+Step 4 : Clone DeepPrep:
+```bash
+git clone https://github.com/pBFSLab/DeepPrep.git /mydata/DeepPrep
+```
+
+Step 5 : Slurm Installation: 
+Follow `/slurm/slurm_installation.md`. Copy `slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
+
+Step: 7 : Configuration/Installation on worker nodes:
 ```bash
 nodes=(vm1 vm2 vm3)
 for node in "${nodes[@]}"; do
@@ -29,16 +40,6 @@ for node in "${nodes[@]}"; do
 done
 ```
 
-Step 4 : Set up shared NFS storage:
-Follow `/src/NFS-setup.md`. The shared volume mounts at `/mydata` on all nodes. 
-
-Step 5 : Clone DeepPrep:
-```bash
-git clone https://github.com/pBFSLab/DeepPrep.git /mydata/DeepPrep
-```
-
-Step 6 — Install and configure Slurm
-Follow `/slurm/slurm_installation.md`. Copy `slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
 
 Step: nn Datasets downloading: The paper uses five publicly available, BIDS-formatted neuroimaging datasets. All are available via the Hugging Face datasets hub (mirrored from OpenNeuro / NITRC).
 
