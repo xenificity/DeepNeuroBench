@@ -5,7 +5,7 @@ This repository contains scripts to set up and configure a Slurm cluster (vm0 ma
 Note: Please run all the commands from the `/home/ubuntu` directory:   
 
 Step: 1 Run the below chunk on `vm0` (master node):
-```
+```bash
 nodes=(vm0 vm1 vm2 vm3)
 for node in "${nodes[@]}"; do
   ssh $node "
@@ -20,12 +20,12 @@ done
 ```
 
 Step: 2 Copying munge key on worker nodes (run it on `vm0`):  
-```
+```bash
 sudo cp /etc/munge/munge.key ~
 sudo chmod 777 munge.key
 ```
 
-```
+```bash
 for node in vm1 vm2 vm3; do
 	scp ~/munge.key $node:~/
 done
@@ -46,7 +46,7 @@ done
 ```
 
 Step: 3 Installing slurm-wlm on all nodes:  
-```
+```bash
 for node in "${nodes[@]}"; do
     ssh $node "
     sudo apt-get install slurm-wlm -y"
@@ -54,14 +54,14 @@ done
 ```
 
 Step: 4 Copy the `slurm.conf` file at `/etc/slurm/slurm.conf` and `/etc/slurm-llnl/slurm.conf` (_you can create slurm directory if it doesnot exist in /etc directory_)  
-```
+```bash
 sudo mkdir -p /etc/slurm
 sudo cp ~/DeepNeuroBench/slurm/slurm.conf /etc/slurm
 sudo cp ~/DeepNeuroBench/slurm/slurm.conf /etc/slurm-llnl
 ```
 
 Step: 5 Copying `slurm.conf` in other worker nodes:  
-```
+```bash
 nodes=(vm1 vm2 vm3)
 for node in "${nodes[@]}"; do
 	scp /etc/slurm/slurm.conf $node:~/;
@@ -72,7 +72,7 @@ done
 ```
 
 Step: 6 Verify configuration by running following commands:  
-```
+```bash
 bash ~/DeepNeuroBench/slurm/check_munge.sh &&
 bash ~/DeepNeuroBench/slurm/start_slurm.sh &&
 bash ~/DeepNeuroBench/slurm/check_status.sh
