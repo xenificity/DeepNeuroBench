@@ -24,11 +24,11 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
               && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nvidia-docker2
-sudo systemctl restart docker
-sudo systemctl status docker
+# sudo systemctl restart docker
+# sudo systemctl status docker
 
 echo "👉 Installing Docker DeepPrep Image."
-sudo docker run hello-world
+# sudo docker run hello-world
 sudo docker pull pbfslab/deepprep:25.1.0
 
 echo "👉 Installing Java 17"
