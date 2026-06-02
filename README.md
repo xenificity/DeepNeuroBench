@@ -1,132 +1,27 @@
-# DeepNeuroBench — Artifact for IISWC 2026 (Anonymous Submission #344)
+# **DeepNeuroBench:** A Benchmark for Cost and Energy-Efficient Execution of Neuroimaging Workflows on Commodity Clusters
+This repository is the reproducibility artifact the DeepNeuroBench. It contains script, configuration file, profiling tool, dataset links, sample result, and the implementation of Algorithm-1.
 
-**A Benchmark for Cost and Energy-Efficient Execution of Neuroimaging Workflows on Commodity Clusters**
+## Prerequisites
+- Access to [FABRIC testbed](https://fabric-testbed.net/) (free academic account)
+- Ubuntu 20.04 VMs with PCIe GPU passthrough (for C2)
+- FreeSurfer license (free from [surfer.nmr.mgh.harvard.edu](https://surfer.nmr.mgh.harvard.edu/registration.html))
+- Each worker VM needs: Docker, Singularity, Nextflow, Java 17, Slurm, Redis, `powertop`, `dstat`, `nvidia-smi`
 
-This repository is the reproducibility artifact for the IISWC 2026 submission. It contains every script, configuration file, profiling tool, dataset reference, sample result, and the reference implementation of Algorithm 1 (multi-criteria cluster recommendation) needed to reproduce the experiments reported in the paper. The artifact covers the full pipeline: FABRIC cluster provisioning → DeepPrep execution → power / CPU / GPU profiling → result collection and plotting → optimal-cluster recommendation.
-
-> **Anonymous review notice.** During the IISWC 2026 double-blind review period, the artifact is hosted at <https://anonymous.4open.science/r/DeepNeuroBench-D818/>. Identifying URLs (author GitHub, HuggingFace usernames) have been redacted from this README. After acceptance, the de-anonymized version with author affiliations and the original GitHub URL will replace this notice.
-
-### Quick start (offline reproducibility — no FABRIC account required)
-
-```bash
-# 1. Verify Algorithm 1 against Table 2 of the paper (5 datasets, ~0.5 s)
-pip install pytest
-python3 -m pytest tests/ -q
-# 95 passed in 0.5s
-
-# 2. Run Algorithm 1 on a sample R value
-python3 src/recommend_cluster.py --R 0.45 --priority makespan
-#   -> Recommended cluster: C2   (GPU-Accelerated)
-#      Config profile     : config/deepprep.slurm.gpu.config
-
-# 3. Run end-to-end (tests + CLI smoke + table consistency)
-bash scripts/verify_artifact.sh
-```
-
-The full FABRIC + DeepPrep execution path (Sections 4 of the paper) requires a FABRIC testbed account and ~24 wall-clock hours per (cluster × dataset) cell; see [Setup](#setup-steps-111) below.
-
----
-
-## Table of Contents
-
-1. [Repository Structure](#repository-structure)
-2. [Cluster Configurations (C1–C4)](#cluster-configurations-c1c4)
-3. [Datasets](#datasets)
-4. [Prerequisites](#prerequisites)
-5. [Setup (Steps 1–11)](#setup-steps-111)
-6. [Running the Experiments](#running-the-experiments)
-7. [Profiling and Monitoring](#profiling-and-monitoring)
-8. [Collecting and Plotting Results](#collecting-and-plotting-results)
-9. [Dataset Morphology Index and Algorithm 1](#dataset-morphology-index-and-algorithm-1)
-10. [Repository File Reference](#repository-file-reference)
-11. [Sample Results & Table 3 Cross-Reference](#sample-results--table-3-cross-reference)
-12. [Reproducibility Checklist](#reproducibility-checklist)
-13. [Known Manuscript Discrepancies](#known-manuscript-discrepancies)
-14. [Citation](#citation)
-
----
-
-## Repository Structure
-
-```
-.
-├── config/                        # Nextflow/Slurm execution profiles
-│   ├── config.sh                  # Worker-node bootstrap (CUDA, Docker, Nextflow)
-│   ├── deepprep.slurm.cpu.config  # Nextflow config for CPU-only clusters (C1, C3, C4)
-│   ├── deepprep.slurm.gpu.config  # Nextflow config for GPU-accelerated cluster (C2)
-│   └── deepprep.slurm.gpu+cpu.config
-├── slurm/                         # Slurm cluster setup
-│   ├── slurm_installation.md      # Step-by-step Slurm install guide
-│   ├── slurm.conf                 # Slurm configuration file
-│   ├── job_deployment_script.sh
-│   ├── check_munge.sh / check_status.sh
-│   ├── restart_slurm.sh / start_slurm.sh
-├── src/                           # Algorithm 1 + node setup scripts
-│   ├── recommend_cluster.py       # *** Algorithm 1 reference implementation + CLI ***
-│   ├── config.sh / conda_installation.sh
-│   ├── install_singularity.sh
-│   ├── check_nvidia.sh
-│   ├── NFS-setup.md               # Shared storage setup guide
-│   └── chess-data-preprocess.sh
-├── tests/                         # Algorithm 1 & Table 3 unit tests (pytest)
-│   ├── conftest.py
-│   ├── test_recommend_cluster.py  # 87 tests: branch coverage + DS-I..DS-V cases
-│   └── test_table3_consistency.py # 8 tests: carbon = energy*EF, min-makespan rows
-├── scripts/
-│   └── verify_artifact.sh         # One-command reproducibility check
-├── stats/                         # Profiling and monitoring
-│   ├── pscript_cpu.sh             # CPU power monitoring via powertop (runs on workers)
-│   ├── pscript_gpus.sh            # GPU power monitoring via nvidia-smi (runs on workers)
-│   ├── run_pstat.py               # Orchestrates powertop collection across VMs
-│   ├── run_dstat.py               # Orchestrates dstat collection across VMs
-│   ├── run_gpu_stat.py            # Orchestrates GPU stat collection
-│   ├── run_cpuusage.py            # CPU utilization collection
-│   ├── power-plot.py              # Generates power consumption plots (Fig. 2)
-│   ├── power-plot.ipynb           # Interactive version of power-plot.py
-│   ├── cpu-plot.ipynb             # CPU utilization plotting notebook
-│   ├── create_duration.py         # Parses Nextflow timeline for makespan extraction
-│   ├── deepPrep.sh                # CPU cluster run script (C1 / C3 / C4)
-│   └── deepPrep_gpu.sh            # GPU cluster run script (C2)
-├── pynb/
-│   └── DeepPrep_Cluster_Creation.ipynb  # FABRIC slice provisioning notebook
-├── results/                       # Sample output + machine-readable tables
-│   ├── table2_morphology.csv      # Table 2 of the paper (datasets + R + Optimal)
-│   ├── table3_metrics.csv         # Table 3 of the paper (makespan/power/energy/CO2/cost)
-│   ├── report.html / timeline.html
-│   ├── plot*.png
-│   └── sub-*/                     # Per-subject DeepPrep HTML reports
-├── freesurfer_key/
-│   └── license.txt                # FreeSurfer license (replace with your own)
-├── deepprep.sh                    # Top-level DeepPrep launcher (wraps Nextflow)
-└── README.md
-```
-
----
-
-## Cluster Configurations (C1–C4)
-
-The paper evaluates four cluster configurations, each a 4-node FABRIC slice (1 master + 3 workers). All CPUs run at 2395.45 MHz.
-
+Step: 1 Cluster Configurations (C1–C4): 
+Use the `DeepNeuroBench-cluster.ipynb` script in the `/src` directory to create clusters in FABRIC testbed.
 | ID | Name | vCPUs (total) | GPUs | RAM/node (GB total) | FABRIC Site |
 |----|------|--------------|------|---------------------|-------------|
 | **C1** | High-Core CPU-Intensive | 64 (192) | — | 64 (192) | HAWI (Hawaii) |
-| **C2** | GPU-Accelerated | 16 (48) | 3 (2× RTX 6000 + 1× T4) | 64 (192) | UCSD (San Diego) |
-| **C3** | Standard-Core CPU-Only | 16 (48) | — | 64 (192) | FIU (Miami) |
-| **C4** | Memory-Enhanced | 16 (48) | — | 128 (384) | MAX (College Park) |
+| **C2** | GPU-Accelerated | 16 (48) | 3 (2× RTX 6000 + 1× T4) | 64 (192) | TACC (Texas) |
+| **C3** | Standard-Core CPU-Only | 16 (48) | — | 64 (192) | HAWI (Hawaii) |
+| **C4** | Memory-Enhanced | 16 (48) | — | 128 (384) | HAWI (Hawaii) |
 
-Use the `pynb/DeepPrep_Cluster_Creation.ipynb` notebook to provision each slice on FABRIC.
 
-Config files to use per cluster:
-
-| Cluster | Nextflow config |
-|---------|----------------|
-| C1, C3, C4 | `config/deepprep.slurm.cpu.config` |
-| C2 | `config/deepprep.slurm.gpu.config` |
+Step: 2 Datasets downloading:
 
 ---
 
 ## Datasets
-
 The paper uses five publicly available, BIDS-formatted neuroimaging datasets. All are available via the Hugging Face datasets hub (mirrored from OpenNeuro / NITRC).
 
 | ID | Name | Subjects | Scans | Size | Morphology Index *M* | Optimal |
@@ -160,6 +55,37 @@ Original dataset sources:
 - DS-V: [OpenNeuro ds007376](https://openneuro.org/datasets/ds007376/versions/1.0.0)
 
 ---
+
+
+
+
+
+---
+## Table of Contents
+
+3. [Datasets](#datasets)
+4. [Prerequisites](#prerequisites)
+5. [Setup (Steps 1–11)](#setup-steps-111)
+6. [Running the Experiments](#running-the-experiments)
+7. [Profiling and Monitoring](#profiling-and-monitoring)
+8. [Collecting and Plotting Results](#collecting-and-plotting-results)
+9. [Dataset Morphology Index and Algorithm 1](#dataset-morphology-index-and-algorithm-1)
+10. [Repository File Reference](#repository-file-reference)
+11. [Sample Results & Table 3 Cross-Reference](#sample-results--table-3-cross-reference)
+12. [Reproducibility Checklist](#reproducibility-checklist)
+13. [Known Manuscript Discrepancies](#known-manuscript-discrepancies)
+14. [Citation](#citation)
+
+---
+
+Config files to use per cluster:
+
+| Cluster | Nextflow config |
+|---------|----------------|
+| C1, C3, C4 | `config/deepprep.slurm.cpu.config` |
+| C2 | `config/deepprep.slurm.gpu.config` |
+
+
 
 ## Prerequisites
 
