@@ -44,8 +44,9 @@ Step 5 : Slurm Installation: Follow instructions at [`/slurm/slurm_installation.
 
 
 Step: 6 Copying `license.txt` to `/mydata`:  
-```
+```bash
 cd /mydata
+mkdir -p /mydata/output
 cp -r ~/DeepNeuroBench/freesurfer_key/ /mydata/
 ```
 
