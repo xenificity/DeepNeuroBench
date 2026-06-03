@@ -113,7 +113,7 @@ hf download xenificity/PostNatalBrains --repo-type dataset --local-dir .
 
 Step 9 (C) : Install Singularity and DeepPrep singularity image using command:   # This would take 10-15minutes for `.sif` file build
 ```bash
-cp ~/Neuro*/src/install_singularity.sh /mydata
+cp ~/DeepNeuroBench/src/install_singularity.sh /mydata
 nodes=(vm0 vm1 vm2 vm3)
 for node in "${nodes[@]}"; do
     echo "$node"
