@@ -82,7 +82,7 @@ done
 nodes=(vm1 vm2 vm3)
 for node in "${nodes[@]}"; do
     echo "-> $node"
-    scp vm0:~/DeepNeuroBench/stats/pscript.sh $node:/home/ubuntu
+    scp vm0:~/DeepNeuroBench/stats/pscript*.sh $node:/home/ubuntu
 done
 ```
 
