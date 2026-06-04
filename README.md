@@ -122,7 +122,7 @@ hf download xenificity/NeuroCycleMRI --repo-type dataset --local-dir .
 hf download xenificity/HumanDignityMRI --repo-type dataset --local-dir .
 hf download xenificity/TumorMRI --repo-type dataset --local-dir .
 hf download xenificity/CognitionMRI --repo-type dataset --local-dir .
-hf download xenificity/PostNatalBrains --repo-type dataset --local-dir .
+hf download xenificity/twilight --repo-type dataset --local-dir .
 "
 ```
 
