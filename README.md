@@ -51,7 +51,7 @@ cp -r ~/DeepNeuroBench/freesurfer_key/ /mydata/
 ```
 
 Step: 7 Setting environment paths on vm1 (change dataset input/output paths here):
-```
+```bash
 ENV_VARS=$(cat <<EOF
 # DeepPrep Environment Variables
 export DEEP_PREP_HOME=/mydata/DeepPrep
@@ -66,9 +66,24 @@ echo "$ENV_VARS" >> "$CONFIG_FILE"
 source ~/.bashrc
 ```
 
-Step: 8 Copying CPU and GPU configuration files: 
-```
+Step: 8 Copying CPU and GPU configuration files and profile tools installing:  
+```bash
 cp ~/DeepNeuroBench/config/deepprep.slurm.*.config /mydata/DeepPrep/deepprep/nextflow/cluster/
+nodes=(vm0 vm1 vm2 vm3)
+for node in "${nodes[@]}"; do
+    echo "→ $node"
+    ssh "$node" '
+        pip3 install --user --quiet pandas matplotlib &&
+        sudo apt update -qq &&
+        sudo apt install -yqq dstat powertop
+    ' && echo " OK" || echo " FAILED"
+done
+#Moving pscript to other VMs
+nodes=(vm1 vm2 vm3)
+for node in "${nodes[@]}"; do
+    echo "-> $node"
+    scp vm0:~/DeepNeuroBench/stats/pscript.sh $node:/home/ubuntu
+done
 ```
 
 Step 9 (a) : Configuration/Installation on worker nodes:
