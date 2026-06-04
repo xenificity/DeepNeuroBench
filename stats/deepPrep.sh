@@ -1,4 +1,4 @@
-cd ~/Neuro*/stats/
+cd ~/DeepNeuroBench/stats/
 python3 run_dstat.py start 4
 python3 run_pstat.py start 4
 python3 run_cpuusage.py start 4
@@ -24,7 +24,7 @@ ${DEEP_PREP_HOME}/deepprep/deepprep.sh \
   --deepprep_home ${DEEP_PREP_HOME} \
   --resume  "
 
-cd ~/Neuro*/stats && \
+cd ~/DeepNeuroBench/stats && \
 python3 run_dstat.py stop 4 && \
 python3 run_cpuusage.py stop 4 && \ 
 #run_pstat.py gets stop automatically as soon as run_dstat gets stop
