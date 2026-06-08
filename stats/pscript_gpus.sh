@@ -5,7 +5,6 @@
 CSV_FILE="gpu_power_log.csv"
 FINAL_LOG="power_energy.out"
 PLOT_DATA="plot_ready.csv"
-PLOT_PNG="gpu_power_energy.png"
 
 # Clear / initialize files
 > "$FINAL_LOG"
@@ -66,63 +65,11 @@ done
 
 echo "Monitoring stopped."
 
-# Prepare clean data for plotting (skip header)
-tail -n +2 "$CSV_FILE" | cut -d',' -f 4,5,6 > "$PLOT_DATA"  # elapsed,gpu_W,gpu_J
-
-python3 - << 'PYEOF'
-import pandas as pd
-import matplotlib.pyplot as plt
-
-plt.style.use("seaborn-whitegrid")
-
-# read trimmed data: powertop,gpu_power,cumulative_energy
-df = pd.read_csv("./plot_ready.csv", header=None,
-                 names=["system_powertop_W", "gpu_power_W", "gpu_energy_J"])
-
-# ensure numeric
-df["system_powertop_W"] = pd.to_numeric(df["system_powertop_W"], errors="coerce").fillna(0.0)
-df["gpu_power_W"] = pd.to_numeric(df["gpu_power_W"], errors="coerce").fillna(0.0)
-df["gpu_energy_J"] = pd.to_numeric(df["gpu_energy_J"], errors="coerce").fillna(0.0)
-
-# compute total power
-df["total_power_W"] = df["system_powertop_W"] + df["gpu_power_W"]
-
-x = df.index  # use sample index on x-axis
-
-fig, ax1 = plt.subplots(figsize=(11, 6))
-
-ax1.plot(x, df["total_power_W"], color="black", lw=2, label="Total power (W)")
-ax1.plot(x, df["gpu_power_W"], color="crimson", lw=1.5, marker="x", ms=6, label="GPU power (W)")
-ax1.plot(x, df["system_powertop_W"], color="green", lw=1.5, marker="o", ms=6, label="System Powertop (W)")
-ax1.set_xlabel("Time interval (seconds)", fontsize=12)
-ax1.set_ylabel("Power (W)", fontsize=12)
-ax1.tick_params(axis="y")
-ax1.grid(alpha=0.35)
-
-ax2 = ax1.twinx()
-ax2.plot(x, df["gpu_energy_J"], color="tab:blue", lw=1.5, marker="o", ms=5, label="Cumulative energy (J)")
-ax2.set_ylabel("Energy (J)", fontsize=12)
-ax2.tick_params(axis="y")
-
-# combined legend
-lines, labels = ax1.get_legend_handles_labels()
-lines2, labels2 = ax2.get_legend_handles_labels()
-ax1.legend(lines + lines2, labels + labels2, loc="upper center", ncol=3, fontsize=10)
-
-plt.title("CPU, GPU energy consumption & Cumulative Energy", fontsize=14)
-plt.tight_layout()
-plt.savefig("gpu_power_energy.png", dpi=200, bbox_inches="tight")
-print("Plot saved → gpu_power_energy.png")
-PYEOF
-
-
-
 # Cleanup temporary files
 # rm -f pdata.tmp "$CSV_FILE" "$PLOT_DATA" 2>/dev/null
-
-rm -f pdata.tmp "$CSV_FILE" 2>/dev/null
-
+# rm -f pdata.tmp "$CSV_FILE" 2>/dev/null
+mv "$CSV_FILE" "$PLOT_DATA" 2>/dev/null
+#rm -r -f pdata.* "$CSV_FILE" "$FINAL_LOG" 2>/dev/null
 echo "Done. Check:"
 echo "  - Log:          $FINAL_LOG  (human readable)"
 echo "  - CSV:          $CSV_FILE   (detailed numbers)"
-echo "  - Plot:         $PLOT_PNG"
