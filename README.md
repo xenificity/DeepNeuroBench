@@ -37,7 +37,7 @@ Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.
 
 Step 4 : Clone DeepPrep at the `/mydata` at `vm0` (_shared directory_):
 ```bash
-git clone https://github.com/pBFSLab/DeepPrep.git /mydata/DeepPrep
+git clone https://github.com/xenificity/DeepPrep.git /mydata/DeepPrep
 ```
 
 Step 5 : Slurm Installation: Follow instructions at [`/slurm/slurm_installation.md`](https://github.com/xenificity/DeepNeuroBench/blob/main/slurm/slurm_installation.md), Copy `/slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
