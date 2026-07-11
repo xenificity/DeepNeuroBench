@@ -1,35 +1,25 @@
-# **DeepNeuroBench:** A Benchmark for Cost and Energy-Efficient Execution of Neuroimaging Workflows on Commodity Clusters
-**Abstract:**
-Preprocessing large neuroimaging datasets is computationally intensive. Although cloud computing enables large-scale
-execution, the cost and energy efficiency of neuroimaging workflows on commodity clusters remains largely unexplored.
-In this work, we evaluate DeepPrep, an open-source GPUaccelerated pipeline for preprocessing neuroimaging datasets,
-across four metrics: makespan, power consumption, energy utilization, and execution cost. We preprocessed five publicly
-available neuroimaging datasets with different characteristics (e.g., number of subjects, scans per subject) on four cluster
-configurations: a CPU-only cluster with a high core count, a CPU-GPU cluster, a CPU-only cluster with a modest core count,
-and a CPU-only cluster with large RAM. Our experiments show that the optimal cost and energy-efficient configurations
-depend on the scan size ratio between the structural and functional scans in the dataset. The CPU-GPU cluster achieved
-the best execution time and energy efficiency for four of the five datasets. Based on these findings, we propose a
-procedure to select the optimal cluster configuration given the target metric (e.g., makespan, power/energy consumption, or
-execution cost).
+# **A Benchmark for Cost and Energy-Efficient Execution of Neuroimaging Workflows on Commodity Clusters**
+**Abstract:**  
+Preprocessing large neuroimaging datasets is computationally intensive. Although cloud computing enables large-scale execution, the cost and energy efficiency of neuroimaging workflows on commodity clusters remains largely unexplored. In this work, we evaluate DeepPrep, an open-source GPU-accelerated pipeline for preprocessing neuroimaging datasets, across five metrics: makespan, power consumption, energy utilization, Carbon Emission, and execution cost. We preprocessed six publicly available neuroimaging datasets with different characteristics e.g., number of subjects, scans per subject on four cluster configurations: a CPU-only cluster with a high core count, a CPU-GPU cluster, a CPU-only cluster with a modest core count, and a CPU-only cluster with large RAM. Our experiments show that the optimal cost and energy-efficient configurations depend on the scan size ratio between the structural and functional scans in the dataset. The CPU-GPU cluster achieved the best execution time and energy efficiency for four of the six datasets. Based on these findings, we propose a procedure to select the optimal cluster configuration given the target metric e.g., makespan, power, energy consumption, carbon emission, and execution cost.
 
-This repository is for the reproducibility for the DeepNeuroBench. It contains, scripts, configuration files, profiling tools, dataset links and algorithm for optimization.
+Note: This repository is an artifact for IISWC-2026 submitted work for reproducibility.
 
 ## Prerequisites
 - Access to [FABRIC testbed](https://fabric-testbed.net/) (free academic account)
 - FreeSurfer license (free from [surfer.nmr.mgh.harvard.edu](https://surfer.nmr.mgh.harvard.edu/registration.html))
 
-Step: 1 Create Clusters with following Configurations (C1–C4): Use the `DeepNeuroBench_Cluster_Creation.ipynb` script in the `/pynb` directory to create clusters in FABRIC testbed.
+Step: 1 Create Clusters with following Configurations (C1–C4): Use the `Cluster_Creation.ipynb` script in the `/pynb` directory to create clusters in FABRIC testbed.
 | ID | Name | vCPUs (total) | GPUs | RAM/node (GB total) | FABRIC Site |
 |----|------|--------------|------|---------------------|-------------|
-| **C1** | CPU-Only High-Core (CPU-Intensive) | 64 (192) | — | 64 (192) | HAWI (Hawaii) |
+| **C1** | CPU-Only High-Cores (CPU-Intensive) | 64 (192) | — | 64 (192) | HAWI (Hawaii) |
 | **C2** | CPU-GPU Cluster (GPU-Accelerated) | 16 (48) | 3 (2× RTX 6000 + 1× T4) | 64 (192) | TACC (Texas) |
-| **C3** | CPU-Only Standard-Core  | 16 (48) | — | 64 (192) | HAWI (Hawaii) |
+| **C3** | CPU-Only Modest-Cores  | 16 (48) | — | 64 (192) | HAWI (Hawaii) |
 | **C4** | CPU-Only (Memory-Enhanced) | 16 (48) | — | 128 (384) | MICH (Michigan) |
 
 
 Step: 2 Clone this repository on `vm0` (master node) at `/home/ubuntu`:  
 ```bash
-git clone https://github.com/xenificity/DeepNeuroBench.git
+git clone https://anonymous.f4open.science//DeepNeuroBench.git
 ```
 
 Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://github.com/xenificity/DeepNeuroBench/blob/main/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
