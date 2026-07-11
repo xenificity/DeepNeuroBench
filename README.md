@@ -22,15 +22,15 @@ Step: 2 Clone this repository on `vm0` (master node) at `/home/ubuntu`:
 git clone https://anonymous.f4open.science//DeepNeuroBench.git
 ```
 
-Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://github.com/xenificity/DeepNeuroBench/blob/main/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
+Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://anonymous.4open.science/r/DeepNeuroBench/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
 
 
 Step 4 : Clone DeepPrep at the `/mydata` at `vm0` (_shared directory_):
 ```bash
-git clone https://github.com/xenificity/DeepPrep.git /mydata/DeepPrep
+git clone https://github.com/pBFSLab/DeepPrep.git /mydata/DeepPrep
 ```
 
-Step 5 : Slurm Installation: Follow instructions at [`/slurm/slurm_installation.md`](https://github.com/xenificity/DeepNeuroBench/blob/main/slurm/slurm_installation.md), Copy `/slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
+Step 5 : Slurm Installation: Follow instructions at [`/slurm/slurm_installation.md`](https://anonymous.4open.science/r/DeepNeuroBench/slurm/slurm_installation.md), Copy `/slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
 
 
 Step: 6 Copying `license.txt` to `/mydata`:  
@@ -94,8 +94,10 @@ Step: 9 (b) Download MRI dataset in BIDS data structure, and keep at `/mydata/da
 | DS-III | Human Dignity | 40 | 80 (40 sMRI + 40 fMRI) | 2.7 GB | 0.22 | C2 |
 | DS-IV | Tumor | 36 | 72 (36 sMRI + 36 fMRI) | 1.6 GB | 0.19 | C2 |
 | DS-V | Cognition | 18 | 36 (18 sMRI + 18 fMRI) | 4.2 GB | 0.013 | C1 |
+| DS-VI | Twilight | 24 | 48 (24 sMRI + 24 fMRI) | 8.79 GB | 0.036 | C1 |
 
-All five datasets are publicly available from their original sources. Download them into `/mydata/data` at `VM0`using the appropriate client per source (_NITRC web download, or OpenNeuro CLI / DataLad for the ds00* IDs_):
+
+All six datasets are publicly available from their original sources. Download them into `/mydata/data` at `VM0`using the appropriate client per source:
 
 ```
 sudo apt install python3-pip -y
