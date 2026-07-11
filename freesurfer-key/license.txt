@@ -1,5 +1,6 @@
-ajay.kumar@missouri.edu
-84034
- *C2Sm4ctFDmOc
- FSSAHDKONtius
- PYVIm+BUokuk+7PfsCm1McgHZYAmE8quLbcL42cb/ws=
+youremail@mail.com
+840324
+ *xxx
+ xxx
+ PYVIm+BUokuk+7PfsCm1McgHZYAmxxE8quLbcL42cb/ws=
+#Note: Please replace this license key with your own freesurfer key. The instruction to generate freesurfer license key is available in the github repository documentation.
