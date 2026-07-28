@@ -1,6 +1,6 @@
-# **A Benchmark for Cost and Energy-Efficient Execution of Neuroimaging Workflows on Commodity Clusters**
+# **DeepNeuroBench: A Benchmark for Cost and Energy-Efficient Execution of Neuroimaging Workflows on Commodity Clusters**
 **Abstract:**  
-Preprocessing large neuroimaging datasets is computationally intensive. Although cloud computing enables large-scale execution, the cost and energy efficiency of neuroimaging workflows on commodity clusters remains largely unexplored. In this work, we evaluate DeepPrep, an open-source GPU-accelerated pipeline for preprocessing neuroimaging datasets, across five metrics: makespan, power consumption, energy utilization, Carbon Emission, and execution cost. We preprocessed six publicly available neuroimaging datasets with different characteristics e.g., number of subjects, scans per subject on four cluster configurations: a CPU-only cluster with a high core count, a CPU-GPU cluster, a CPU-only cluster with a modest core count, and a CPU-only cluster with large RAM. Our experiments show that the optimal cost and energy-efficient configurations depend on the scan size ratio between the structural and functional scans in the dataset. The CPU-GPU cluster achieved the best execution time and energy efficiency for four of the six datasets. Based on these findings, we propose a procedure to select the optimal cluster configuration given the target metric e.g., makespan, power, energy consumption, carbon emission, and execution cost.
+Preprocessing large neuroimaging datasets is computationally intensive, and at scale its energy consumption and monetary cost increases significantly. Although cloud computing enables large-scale execution, the energy and cost efficiency of neuroimaging workflows on commodity clusters remain largely unexplored. In this work, we evaluate DeepPrep, an open-source GPU-accelerated pipeline for preprocessing neuroimaging datasets, across five metrics: makespan, power consumption, energy utilization, carbon emission, and execution cost. We preprocessed six publicly available neuroimaging datasets with different characteristics e.g., number of subjects, scans per subject on four cluster configurations: a CPU-only cluster with a high core count, a CPU-GPU cluster, a CPU-only cluster with a modest core count, and a CPU-only cluster with large RAM. Our experiments show that the optimal cost and energy-efficient configurations depend on the average scan size ratio (R) between the structural and functional scans in the dataset. The CPU-GPU cluster was the most power and energy efficient for all of the six datasets - reducing energy by roughly 72\% and power by 74\% on average over the high-core CPU-only cluster-while achieving the best execution time for four of the six datasets. The CPU-only cluster with a modest cores was consistently cost-optimized across all datasets. Based on these findings, we propose a procedure to select the optimal cluster configuration given the target metric i.e., makespan, power, energy, carbon emission, or execution cost.
 
 Note: This repository is an artifact for IISWC-2026 submitted work for reproducibility.
 
@@ -19,10 +19,10 @@ Step: 1 Create Clusters with following Configurations (C1–C4): Use the `Cluste
 
 Step: 2 Clone this repository on `vm0` (master node) at `/home/ubuntu`:  
 ```bash
-git clone https://anonymous.f4open.science//DeepNeuroBench.git
+git clone https://github.com/xenificity/DeepNeuroBench.git
 ```
 
-Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://anonymous.4open.science/r/DeepNeuroBench/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
+Step 3 : Set up shared NFS storage at `vm0`: Follow instructions at [`NFS-setup.md`](https://github.com/xenificity/DeepNeuroBench/src/NFS-setup.md), shared volume mounts at `/mydata` on all nodes. 
 
 
 Step 4 : Clone DeepPrep at the `/mydata` at `vm0` (_shared directory_):
@@ -30,7 +30,7 @@ Step 4 : Clone DeepPrep at the `/mydata` at `vm0` (_shared directory_):
 git clone https://github.com/pBFSLab/DeepPrep.git /mydata/DeepPrep
 ```
 
-Step 5 : Slurm Installation: Follow instructions at [`/slurm/slurm_installation.md`](https://anonymous.4open.science/r/DeepNeuroBench/slurm/slurm_installation.md), Copy `/slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
+Step 5 : Slurm Installation: Follow instructions at [`/slurm/slurm_installation.md`](https://github.com/xenificity/DeepNeuroBench/slurm/slurm_installation.md), Copy `/slurm/slurm.conf` to `/etc/slurm/slurm.conf` on all nodes.
 
 
 Step: 6 Copying `license.txt` to `/mydata`:  
